@@ -2,6 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 import Functional as func
 
+BD_EQUIP = None
+BD_SAM = None
+
 
 class WizardLikeApp(tk.Tk):
     def __init__(self, *args, **kwargs):
@@ -9,22 +12,10 @@ class WizardLikeApp(tk.Tk):
 
         self.title('Program by Lukin Alexander ©')
 
-        self.geometry('560x200+{}+{}'.format(self.winfo_screenwidth() // 2 - 300, self.winfo_screenheight() // 2 - 300))
+        self.geometry('600x200+{}+{}'.format(self.winfo_screenwidth() // 2 - 300, self.winfo_screenheight() // 2 - 300))
         self.resizable(False, False)
         menu_bar = tk.Menu(self)
         self.config(menu=menu_bar)
-
-        file_menu = tk.Menu(menu_bar, tearoff=0)
-
-        file_menu.add_command(label='New', command=self.reset_window)
-        file_menu.add_command(label=' ')  # Free space between buttons
-        file_menu.add_command(label='Exit', command=self.quit)
-        menu_bar.add_cascade(label='  File  ', menu=file_menu)
-
-        help_menu = tk.Menu(menu_bar, tearoff=0)
-
-        help_menu.add_command(label='Features', command=self.help_window_show)
-        menu_bar.add_cascade(label='  Help  ', menu=help_menu)
 
         container = tk.Frame(self)
         container.pack(side='top', fill='both', expand=True)
@@ -39,6 +30,20 @@ class WizardLikeApp(tk.Tk):
             frame.grid(row=0, column=0, sticky='nsew')
 
         self.show_frame(StartPage)
+
+        file_menu = tk.Menu(menu_bar, tearoff=0)
+
+        file_menu.add_command(label='NEW', command=self.reset_window)
+        file_menu.add_command(label='Station', command=lambda: self.show_frame(PageStation))
+        file_menu.add_command(label='SAM', command=lambda: self.show_frame(PageTwo))
+        file_menu.add_command(label=' ')  # Free space between buttons
+        file_menu.add_command(label='Exit', command=self.quit)
+        menu_bar.add_cascade(label='  File  ', menu=file_menu)
+
+        help_menu = tk.Menu(menu_bar, tearoff=0)
+
+        help_menu.add_command(label='Features', command=self.help_window_show)
+        menu_bar.add_cascade(label='  Help  ', menu=help_menu)
 
     def show_frame(self, cont):
         frame = self.frames[cont]
@@ -66,11 +71,9 @@ class StartPage(tk.Frame):
         ent_db_equip.insert(0, 'E:/Python Projects/KAESER_Program/test.csv')
         ent_db_equip.grid(row=0, column=1, columnspan=3)
 
-        but_ok_db_equip = ttk.Button(self, text='OK', command=self.entry_get_directory(ent_db_equip.get(), label1)) # FIXME make event function
+        but_ok_db_equip = ttk.Button(self, text='OK',
+                                     command=lambda: self.entry_equip_get_directory(ent_db_equip.get()))
         but_ok_db_equip.grid(row=0, column=5, pady=10, padx=20)
-
-        button = ttk.Button(self, text='Station calc', command=lambda: controller.show_frame(PageStation))
-        button.grid(row=4, column=1, pady=10, padx=20)
 
         label2 = tk.Label(self, text='Enter SAM \nData Base directory:', font='Helvetica 12')
         label2.grid(row=1, column=0, sticky='w', pady=10, padx=20)
@@ -78,42 +81,50 @@ class StartPage(tk.Frame):
         ent_sam_equip = tk.Entry(self, width=35, font='Helvetica 11')
         ent_sam_equip.grid(row=1, column=1, columnspan=3)
 
-        button2 = tk.Button(self, text='SAM calc', font='Helvetica 12 bold',
-                            command=lambda: controller.show_frame(PageTwo))
-        button2.grid(row=4, column=2)
+        but_ok_db_sam = ttk.Button(self, text='OK',
+                                   command=lambda: self.entry_sam_get_directory(ent_sam_equip.get()))
+        but_ok_db_sam.grid(row=1, column=5, pady=10, padx=20)
 
-        # TEST
+    @staticmethod
+    def entry_equip_get_directory(entry):
+        global BD_EQUIP  # TODO: do it without global
+        direct_equip = func.csv_file_directory(entry)
+        BD_EQUIP = direct_equip
 
-        # label3 = tk.Label(self, text=self.entry_get_directory(ent_db_equip.get()))
-        # label3.grid(row=4, column=0)
-
-    def entry_get_directory(self, something, name):
-        direct_equip = func.csv_file_directory(something)
-        name.config(text='111')
-        return direct_equip
+    @staticmethod
+    def entry_sam_get_directory(entry):
+        global BD_SAM  # TODO: do it without global
+        direct_equip = func.csv_file_directory(entry)
+        BD_SAM = direct_equip
 
 
 class PageStation(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
 
-        label = tk.Label(self, text='Page One')
-        label.grid(row=3, column=3, sticky='w', pady=10, padx=20)
+        fake_label = tk.Label(self)
+        fake_label.grid(row=4, column=1)
 
-        button1 = tk.Button(self, text='Back to Home',
-                            command=lambda: controller.show_frame(StartPage))
-        button1.grid(row=1, column=1, pady=10, padx=20)
+        label1 = tk.Label(self, text='Compressor:', font='Helvetica 11')
+        label1.grid(row=0, column=1, pady=5)
 
-        button2 = tk.Button(self, text='Page Two',
-                            command=lambda: controller.show_frame(PageTwo))
-        button2.grid(row=2, column=2, pady=10, padx=20)
+        label2 = tk.Label(self, text='Dryer, filter, DSH:', font='Helvetica 11')
+        label2.grid(row=2, column=1, pady=5)
 
-        button3 = tk.Button(self, text='Page Two',
-                            command=lambda: controller.show_frame(PageTwo))
-        button3.grid(row=2, column=3, pady=10, padx=20)
+        but_back_sp = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
+        but_back_sp.grid(row=5, column=0, pady=20, padx=20)
 
-        equip_box = ttk.Combobox(self)
-        equip_box.grid(row=0, column=0)
+        but_ok1 = ttk.Button(self, text='OK')
+        but_ok1.grid(row=1, column=0, padx=20)
+
+        equip_box1 = ttk.Combobox(self, values=[])
+        equip_box1.grid(row=1, column=1, columnspan=2)
+
+        but_ok2 = ttk.Button(self, text='OK')
+        but_ok2.grid(row=3, column=0, padx=20)
+
+        equip_box2 = ttk.Combobox(self, values=[])
+        equip_box2.grid(row=3, column=1, columnspan=2)
 
 
 class PageTwo(tk.Frame):
