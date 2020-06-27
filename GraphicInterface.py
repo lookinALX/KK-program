@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 import Functional as func
+import configurations as conf
 
 BD_EQUIP = None
 BD_SAM = None
@@ -12,7 +13,7 @@ class WizardLikeApp(tk.Tk):
 
         self.title('Program by Lukin Alexander ©')
 
-        self.geometry('600x200+{}+{}'.format(self.winfo_screenwidth() // 2 - 300, self.winfo_screenheight() // 2 - 300))
+        self.geometry('600x250+{}+{}'.format(self.winfo_screenwidth() // 2 - 300, self.winfo_screenheight() // 2 - 300))
         self.resizable(False, False)
         menu_bar = tk.Menu(self)
         self.config(menu=menu_bar)
@@ -65,7 +66,7 @@ class StartPage(tk.Frame):
         self.parent = parent
 
         label1 = tk.Label(self, text='Enter equipment \nData Base directory:', font='Helvetica 12')
-        label1.grid(row=0, column=0, sticky='w', pady=10, padx=20)
+        label1.grid(row=0, column=0, sticky='w', pady=30, padx=20)
 
         ent_db_equip = ttk.Entry(self, width=35, font='Helvetica 11')
         ent_db_equip.insert(0, 'E:/Python Projects/KAESER_Program/test.csv')
@@ -103,28 +104,37 @@ class PageStation(tk.Frame):
         super().__init__(parent)
 
         fake_label = tk.Label(self)
-        fake_label.grid(row=4, column=1)
+        fake_label.grid(row=6, column=1)
 
         label1 = tk.Label(self, text='Compressor:', font='Helvetica 11')
         label1.grid(row=0, column=1, pady=5)
 
-        label2 = tk.Label(self, text='Dryer, filter, DSH:', font='Helvetica 11')
+        label2 = tk.Label(self, text='Dryer:', font='Helvetica 11')
         label2.grid(row=2, column=1, pady=5)
 
+        label3 = tk.Label(self, text='Filter, DSH:', font='Helvetica 11')
+        label3.grid(row=4, column=1, pady=5)
+
         but_back_sp = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
-        but_back_sp.grid(row=5, column=0, pady=20, padx=20)
+        but_back_sp.grid(row=7, column=0, pady=20, padx=20)
 
-        but_ok1 = ttk.Button(self, text='OK')
-        but_ok1.grid(row=1, column=0, padx=20)
+        but_add1 = ttk.Button(self, text='Add')
+        but_add1.grid(row=1, column=0, padx=20)
 
-        equip_box1 = ttk.Combobox(self, values=[])
+        equip_box1 = ttk.Combobox(self, values=conf.Equipment.compressors)
         equip_box1.grid(row=1, column=1, columnspan=2)
 
-        but_ok2 = ttk.Button(self, text='OK')
-        but_ok2.grid(row=3, column=0, padx=20)
+        but_add2 = ttk.Button(self, text='Add')
+        but_add2.grid(row=3, column=0, padx=20)
 
-        equip_box2 = ttk.Combobox(self, values=[])
+        equip_box2 = ttk.Combobox(self, values=conf.Equipment.dr_fl_dhs)
         equip_box2.grid(row=3, column=1, columnspan=2)
+
+        but_add3 = ttk.Button(self, text='Add')
+        but_add3.grid(row=5, column=0, padx=20)
+
+        equip_box3 = ttk.Combobox(self, values=conf.Equipment.dr_fl_dhs)
+        equip_box3.grid(row=5, column=1, columnspan=2)
 
 
 class PageTwo(tk.Frame):
