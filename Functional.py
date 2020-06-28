@@ -13,14 +13,12 @@ def New_Excel_creation(df, eq_name):
     writer.save()
 
 
-def select_rows(df, eq_name, amount=0, change1='Wight', change2='Dimensions',
+def select_rows(df, eq_name, amount=1, change1='Wight', change2='Dimensions',
                 eq='Equipment', pr='Price', fad='FAD'):
     """"Function selects particular rows and creates new DataFrame
         Takes DataFrame, change1 and change 2 (changeable name), eq='Equipment', pr='Price', fad='FAD'
         Takes amount (normally input)
     """
-    if amount == 0:
-        amount = int(input('Enter the number of equipment: '))
     # Создание нового фрейма, хз так себе...
     new_df = pd.DataFrame({eq: '_', pr: '_', change1: '_', change2: '_', fad: '_'}, index=[0])
     for i in range(amount):
