@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox as mb
 import Functional as func
 import configurations as conf
 
@@ -89,8 +90,13 @@ class StartPage(tk.Frame):
     @staticmethod
     def entry_equip_get_directory(entry):
         global BD_EQUIP  # TODO: do it without global
-        direct_equip = func.csv_file_directory(entry)
-        BD_EQUIP = direct_equip
+        try:
+            direct_equip = func.csv_file_directory(entry)
+            BD_EQUIP = direct_equip
+        except FileNotFoundError:
+            mb.showerror(title='Error', message='File is not found!')
+        else:
+            mb.showinfo(title='Success', message='Data Base has been downloaded')
 
     @staticmethod
     def entry_sam_get_directory(entry):
@@ -115,7 +121,7 @@ class PageStation(tk.Frame):
         but_back_sp = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
         but_back_sp.grid(row=7, column=4, pady=20, padx=20)
 
-        but_add1 = ttk.Button(self, text='Add', command=lambda: textbox.insert(0, equip_box1.get()))
+        but_add1 = ttk.Button(self, text='Add', command=lambda: textbox.insert(tk.END, equip_box1.get()))
         but_add1.grid(row=1, column=0, padx=20)
 
         equip_box1 = AutocompleteCombobox(self, values=conf.Equipment.compressors)
@@ -133,12 +139,21 @@ class PageStation(tk.Frame):
         equip_box3 = AutocompleteCombobox(self, values=conf.Equipment.dr_fl_dhs)
         equip_box3.grid(row=5, column=1, columnspan=2)
 
-        textbox = tk.Listbox(self, width=15, height=8)    # For test reason
-        textbox.grid(row=1, column=3, rowspan=4, padx=30)
+        textbox = tk.Listbox(self, width=20, height=8)
+        textbox.grid(row=1, column=3, rowspan=4, padx=30, sticky='nse')
 
         scroll = tk.Scrollbar(self, command=textbox.yview)
         scroll.grid(row=1, column=3, rowspan=4, sticky='nse')
         textbox.config(yscrollcommand=scroll.set)
+
+        # TODO: deal with name parameter
+        but_get_deliv_list = ttk.Button(self, text='Delivery list', command=lambda: self.get_delivery_file(BD_EQUIP,
+                                                                                                           'SX 3'))
+        but_get_deliv_list.grid(row=1, column=4, padx=20)
+
+    def get_delivery_file(self, bd_file, name):
+        func.New_Excel_creation(bd_file, name)  # For test reason
+        print(bd_file)
 
 
 class PageTwo(tk.Frame):
