@@ -66,7 +66,7 @@ class StartPage(tk.Frame):
 
         self.parent = parent
 
-        label1 = tk.Label(self, text='Enter equipment \nData Base directory:', font='Helvetica 12')
+        label1 = tk.Label(self, text='Enter equipment \nData Base directory:', font='12')
         label1.grid(row=0, column=0, sticky='w', pady=30, padx=20)
 
         ent_db_equip = ttk.Entry(self, width=35, font='Helvetica 11')
@@ -77,7 +77,7 @@ class StartPage(tk.Frame):
                                      command=lambda: self.entry_equip_get_directory(ent_db_equip.get()))
         but_ok_db_equip.grid(row=0, column=5, pady=10, padx=20)
 
-        label2 = tk.Label(self, text='Enter SAM \nData Base directory:', font='Helvetica 12')
+        label2 = tk.Label(self, text='Enter SAM \nData Base directory:', font='12')
         label2.grid(row=1, column=0, sticky='w', pady=10, padx=20)
 
         ent_sam_equip = tk.Entry(self, width=35, font='Helvetica 11')
@@ -139,36 +139,49 @@ class PageStation(tk.Frame):
         equip_box3 = AutocompleteCombobox(self, values=conf.Equipment.dr_fl_dhs)
         equip_box3.grid(row=5, column=1, columnspan=2)
 
-        textbox = tk.Listbox(self, width=20, height=8)
-        textbox.grid(row=1, column=3, rowspan=4, padx=30, sticky='nse')
+        textbox = tk.Listbox(self, width=20, height=15)
+        textbox.grid(row=0, column=3, rowspan=8, padx=30, sticky='nse')
 
         scroll = tk.Scrollbar(self, command=textbox.yview)
-        scroll.grid(row=1, column=3, rowspan=4, sticky='nse')
+        scroll.grid(row=0, column=3, rowspan=8, sticky='nse')
         textbox.config(yscrollcommand=scroll.set)
 
-        # TODO: deal with name parameter
-        but_get_deliv_list = ttk.Button(self, text='Delivery list', command=lambda: self.get_delivery_file(BD_EQUIP,
-                                                                                                           'SX 3'))
+        but_get_deliv_list = ttk.Button(self, text='Delivery list',
+                                        command=lambda: self.get_delivery_file(BD_EQUIP, textbox.get(0, tk.END)))
         but_get_deliv_list.grid(row=1, column=4, padx=20)
 
-    def get_delivery_file(self, bd_file, name):
-        func.New_Excel_creation(bd_file, name)  # For test reason
-        print(bd_file)
+    def get_delivery_file(self, bd_file, name_list):
+        try:
+            func.New_Excel_creation(bd_file, list(name_list))
+        except AttributeError:
+            mb.showerror(title='Error', message='Name is not exist')
+        else:
+            mb.showinfo(title='Success', message='Excel file has been created')
 
 
 class PageTwo(tk.Frame):
     def __init__(self, parent, controller):
         super().__init__(parent)
-        label = tk.Label(self, text='Page Two')
-        label.pack(pady=10, padx=10)
+        label1 = tk.Label(self, text='SN compressors:')
+        label1.grid(row=0, column=0, pady=10, padx=10)
 
-        button1 = tk.Button(self, text='Back to Home',
-                            command=lambda: controller.show_frame(StartPage))
-        button1.pack()
+        label2 = tk.Label(self, text='Other compressors:')
+        label2.grid(row=1, column=0, pady=10, padx=10)
 
-        button2 = tk.Button(self, text='Page One',
-                            command=lambda: controller.show_frame(PageStation))
-        button2.pack()
+        label3 = tk.Label(self, text='SN units:\n(dryers, dhs, etc)')
+        label3.grid(row=2, column=0, pady=10, padx=10)
+
+        label4 = tk.Label(self, text='Filter:')
+        label4.grid(row=3, column=0, pady=10, padx=10)
+
+        label5 = tk.Label(self, text='Other units:')
+        label5.grid(row=4, column=0, pady=10, padx=10)
+
+        button1 = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
+        button1.grid(row=0, column=1)
+
+        button2 = ttk.Button(self, text='Page One', command=lambda: controller.show_frame(PageStation))
+        button2.grid(row=1, column=1)
 
 
 class ChildWindow(tk.Toplevel):
