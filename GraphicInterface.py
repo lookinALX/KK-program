@@ -82,6 +82,7 @@ class StartPage(tk.Frame):
 
         ent_sam_equip = tk.Entry(self, width=35, font='Helvetica 11')
         ent_sam_equip.grid(row=1, column=1, columnspan=3)
+        ent_sam_equip.insert(0, 'E:/Python Projects/KAESER_Program/sam.csv')
 
         but_ok_db_sam = ttk.Button(self, text='OK',
                                    command=lambda: self.entry_sam_get_directory(ent_sam_equip.get()))
@@ -101,8 +102,13 @@ class StartPage(tk.Frame):
     @staticmethod
     def entry_sam_get_directory(entry):
         global BD_SAM  # TODO: do it without global
-        direct_equip = func.csv_file_directory(entry)
-        BD_SAM = direct_equip
+        try:
+            direct_equip = func.csv_file_directory(entry)
+            BD_SAM = direct_equip
+        except FileNotFoundError:
+            mb.showerror(title='Error', message='File is not found!')
+        else:
+            mb.showinfo(title='Success', message='Data Base has been downloaded')
 
 
 class PageStation(tk.Frame):
@@ -152,7 +158,7 @@ class PageStation(tk.Frame):
 
     def get_delivery_file(self, bd_file, name_list):
         try:
-            func.New_Excel_creation(bd_file, list(name_list))
+            func.New_Excel_creation_with_selection(bd_file, list(name_list))
         except AttributeError:
             mb.showerror(title='Error', message='Name is not exist')
         else:
@@ -165,23 +171,52 @@ class PageTwo(tk.Frame):
         label1 = tk.Label(self, text='SN compressors:')
         label1.grid(row=0, column=0, pady=10, padx=10)
 
-        label2 = tk.Label(self, text='Other compressors:')
+        ent_sn_comp = ttk.Entry(self)
+        ent_sn_comp.grid(row=0, column=1)
+        ent_sn_comp.insert(0, '0')
+
+        label2 = tk.Label(self, text='Another compressors:')
         label2.grid(row=1, column=0, pady=10, padx=10)
+
+        ent_athr_comp = ttk.Entry(self)
+        ent_athr_comp.grid(row=1, column=1)
+        ent_athr_comp.insert(0, '0')
 
         label3 = tk.Label(self, text='SN units:\n(dryers, dhs, etc)')
         label3.grid(row=2, column=0, pady=10, padx=10)
 
-        label4 = tk.Label(self, text='Filter:')
+        ent_sn_units = ttk.Entry(self)
+        ent_sn_units.grid(row=2, column=1)
+        ent_sn_units.insert(0, '0')
+
+        label4 = tk.Label(self, text='Filters:')
         label4.grid(row=3, column=0, pady=10, padx=10)
 
-        label5 = tk.Label(self, text='Other units:')
+        ent_filters = ttk.Entry(self)
+        ent_filters.grid(row=3, column=1)
+        ent_filters.insert(0, '0')
+
+        label5 = tk.Label(self, text='Another units:')
         label5.grid(row=4, column=0, pady=10, padx=10)
 
+        ent_an_units = ttk.Entry(self)
+        ent_an_units.grid(row=4, column=1)
+        ent_an_units.insert(0, '0')
+
         button1 = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
-        button1.grid(row=0, column=1)
+        button1.grid(row=4, column=2)
 
         button2 = ttk.Button(self, text='Page One', command=lambda: controller.show_frame(PageStation))
-        button2.grid(row=1, column=1)
+        button2.grid(row=5, column=2)
+
+        button3 = ttk.Button(self, text='Calculate', command=lambda: self.get_sam_calculation(BD_SAM,
+                                                    int(ent_sn_comp.get()) + int(ent_athr_comp.get()),
+                                                    int(ent_sn_comp.get()) + int(ent_sn_units.get())))
+        button3.grid(row=3, column=3)
+
+    def get_sam_calculation(self, bd_file, amount_compr, sn_units):
+        func.sam_calculation(bd_file, amount_compr, sn_units)
+        mb.showinfo(title='Success', message='Excel file has been created')
 
 
 class ChildWindow(tk.Toplevel):
