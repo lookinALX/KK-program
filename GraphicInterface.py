@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox as mb
 import Functional as func
 import configurations as conf
+from PIL import ImageTk, Image
+
 
 BD_EQUIP = None
 BD_SAM = None
@@ -38,7 +40,7 @@ class WizardLikeApp(tk.Tk):
         file_menu.add_command(label='NEW', command=self.reset_window)
         file_menu.add_command(label='Station', command=lambda: self.show_frame(PageStation))
         file_menu.add_command(label='SAM', command=lambda: self.show_frame(PageTwo))
-        file_menu.add_command(label=' ')  # Free space between buttons
+        file_menu.add_separator()
         file_menu.add_command(label='Exit', command=self.quit)
         menu_bar.add_cascade(label='  File  ', menu=file_menu)
 
@@ -57,7 +59,9 @@ class WizardLikeApp(tk.Tk):
 
     def help_window_show(self):
         window = ChildWindow()
-        window.init_child('Window', '300x300')
+        img = ImageTk.PhotoImage(Image.open("test_screen.jpg"))
+        window.init_child('Window', '300x300', img)
+        window.resizable(False, False)
 
 
 class StartPage(tk.Frame):
@@ -161,6 +165,8 @@ class PageStation(tk.Frame):
             func.New_Excel_creation_with_selection(bd_file, list(name_list))
         except AttributeError:
             mb.showerror(title='Error', message='Name is not exist')
+        except TypeError:
+            mb.showerror(title='Error', message='Data Base has not been downloaded')
         else:
             mb.showinfo(title='Success', message='Excel file has been created')
 
@@ -189,44 +195,57 @@ class PageTwo(tk.Frame):
         ent_sn_units.grid(row=2, column=1)
         ent_sn_units.insert(0, '0')
 
-        label4 = tk.Label(self, text='Filters:')
+        label4 = tk.Label(self, text='Filters / not SN units:')
         label4.grid(row=3, column=0, pady=10, padx=10)
 
         ent_filters = ttk.Entry(self)
         ent_filters.grid(row=3, column=1)
         ent_filters.insert(0, '0')
 
-        label5 = tk.Label(self, text='Another units:')
+        label5 = tk.Label(self, text='Pressure transducer:')
         label5.grid(row=4, column=0, pady=10, padx=10)
 
         ent_an_units = ttk.Entry(self)
         ent_an_units.grid(row=4, column=1)
-        ent_an_units.insert(0, '0')
+        ent_an_units.insert(0, '1')
 
         button1 = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
-        button1.grid(row=4, column=2)
+        button1.grid(row=4, column=4)
 
         button2 = ttk.Button(self, text='Page One', command=lambda: controller.show_frame(PageStation))
-        button2.grid(row=5, column=2)
+        button2.grid(row=5, column=4)
 
         button3 = ttk.Button(self, text='Calculate', command=lambda: self.get_sam_calculation(BD_SAM,
                                                     int(ent_sn_comp.get()) + int(ent_athr_comp.get()),
-                                                    int(ent_sn_comp.get()) + int(ent_sn_units.get())))
+                                                    int(ent_sn_comp.get()) + int(ent_sn_units.get()),
+                                                    int(ent_filters.get()), int(ent_athr_comp.get())))
         button3.grid(row=3, column=3)
 
-    def get_sam_calculation(self, bd_file, amount_compr, sn_units):
-        func.sam_calculation(bd_file, amount_compr, sn_units)
-        mb.showinfo(title='Success', message='Excel file has been created')
+    def sam_window_show(self, screen_name):
+        window = ChildWindow()
+        img = ImageTk.PhotoImage(Image.open(screen_name))
+        window.init_child('SAM configuration', '300x300', img)
+
+    def get_sam_calculation(self, bd_file, amount_compr, sn_units, not_sn_units, not_sn_compr):
+        try:
+            func.sam_calculation(bd_file, amount_compr, sn_units, not_sn_units, not_sn_compr)
+        except TypeError:
+            mb.showerror(title='Error', message='Data Base has not been downloaded')
+        else:
+            mb.showinfo(title='Success', message='Excel file has been created')
+            self.sam_window_show("test_screen.jpg")
 
 
 class ChildWindow(tk.Toplevel):
     def __init__(self):
         super().__init__()
 
-    def init_child(self, win_title, win_geometry):
+    def init_child(self, win_title, win_geometry, img):
         self.title(win_title)
         self.geometry(win_geometry + '+400+300')
-        self.resizable(False, False)
+        information = tk.Label(self, image=img)
+        information.image = img
+        information.pack(side="bottom", fill="both", expand="yes")
 
         self.grab_set()
         self.focus_set()
