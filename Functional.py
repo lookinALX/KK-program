@@ -15,7 +15,7 @@ def new_excel_creation(df):
 
 def New_Excel_creation_with_selection(df, equip, change1='Wight', change2='Dimensions', change3='FAD'):
     writer = pd.ExcelWriter('E:/Python Projects/KAESER_Program/new_file.xlsx')
-    select_rows(df, equip, change1,  change2, change3).to_excel(writer, 'Sheet1')
+    select_rows(df, equip).to_excel(writer, 'Sheet1')
     writer.save()
 
 
@@ -37,7 +37,7 @@ def select_rows(df, equip, change1='Wight', change2='Dimensions', change3='FAD',
     return new_df
 
 
-def sam_calculation(df, compr, sn_units):
+def sam_calculation(df, compr, sn_units, not_sn_units=0, not_sn_compr=0):
     if compr <= 4:
         sam = 'SAM 2-4'
     elif 4 < compr <= 8:
@@ -46,8 +46,25 @@ def sam_calculation(df, compr, sn_units):
         sam = 'SAM 2-16'
     else:
         sam = '_'
-    equip = [sam]
-    New_Excel_creation_with_selection(df, equip, 'Material number', 'Max length per unit', 'Required amount')
+    equip = [sam, 'SigmaNetwork Cable', 'Ethernet set', 'Plug Ethernet RJ45', 'Cable 2x0.75 analogue']
+    amount_column = ['_', 1, 'max 100 m per unit', sn_units, sn_units, '30 m per pressure transducer']
+    selected_df = select_rows(df, equip, 'Material number', 'Max length per unit')
+    del selected_df['FAD']
+    selected_df = selected_df.reset_index(drop=True)
+    if not_sn_units != 0 and not_sn_compr == 0:
+        amount_column.append('max 100 m per not SN unit')
+        search = df['Equipment'] == 'Cable 2x0.75 digital'
+        selected_df = pd.concat([selected_df, df.loc[search]])
+    elif not_sn_units != 0 and not_sn_compr != 0 or not_sn_compr != 0:
+        amount_column.append('max 100 m per not SN unit (compressors)')
+        search = df['Equipment'] == 'Cable 2x0.75 digital'
+        selected_df = pd.concat([selected_df, df.loc[search]])
+        selected_df['Amount'] = amount_column
+        selected_df['you probably need SBU, please contact application engineer'] = ['you probably need SBU, please ' \
+                                                                                     'contact application engineer'
+                                                                                     for n in range(7)]
+    selected_df['Amount'] = amount_column
+    new_excel_creation(selected_df)
 
 
 def check_input(example, list_of_sth):
