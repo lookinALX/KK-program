@@ -160,15 +160,22 @@ class PageStation(tk.Frame):
                                         command=lambda: self.get_delivery_file(BD_EQUIP, textbox.get(0, tk.END)))
         but_get_deliv_list.grid(row=1, column=4, padx=20)
 
-    def get_delivery_file(self, bd_file, name_list):
-        try:
-            func.New_Excel_creation_with_selection(bd_file, list(name_list))
-        except AttributeError:
-            mb.showerror(title='Error', message='Name is not exist')
-        except TypeError:
+        but_gap_check = ttk.Button(self, text='Check control gap')
+        but_gap_check.grid(row=3, column=4, padx=20)
+
+    @staticmethod
+    def get_delivery_file(bd_file, name_list):
+        if bd_file is None:
             mb.showerror(title='Error', message='Data Base has not been downloaded')
         else:
-            mb.showinfo(title='Success', message='Excel file has been created')
+            try:
+                func.New_Excel_creation_with_selection(bd_file, list(name_list))
+            except AttributeError:
+                mb.showerror(title='Error', message='Name is not exist')
+            except TypeError:
+                mb.showerror(title='Error', message='Data Base has not been downloaded')
+            else:
+                mb.showinfo(title='Success', message='Excel file has been created')
 
 
 class PageTwo(tk.Frame):
@@ -188,14 +195,14 @@ class PageTwo(tk.Frame):
         ent_athr_comp.grid(row=1, column=1)
         ent_athr_comp.insert(0, '0')
 
-        label3 = tk.Label(self, text='SN units:\n(dryers, dhs, etc)')
+        label3 = tk.Label(self, text='Dryers (TE, TF, TG)\nHybritec')
         label3.grid(row=2, column=0, pady=10, padx=10)
 
         ent_sn_units = ttk.Entry(self)
         ent_sn_units.grid(row=2, column=1)
         ent_sn_units.insert(0, '0')
 
-        label4 = tk.Label(self, text='Filters / not SN units:')
+        label4 = tk.Label(self, text='Filters \n Not SN units:')
         label4.grid(row=3, column=0, pady=10, padx=10)
 
         ent_filters = ttk.Entry(self)
@@ -205,35 +212,54 @@ class PageTwo(tk.Frame):
         label5 = tk.Label(self, text='Pressure transducer:')
         label5.grid(row=4, column=0, pady=10, padx=10)
 
-        ent_an_units = ttk.Entry(self)
-        ent_an_units.grid(row=4, column=1)
-        ent_an_units.insert(0, '1')
+        ent_ptu = ttk.Entry(self)
+        ent_ptu.grid(row=4, column=1)
+        ent_ptu.insert(0, '1')
+
+        label6 = tk.Label(self, text='DHS')
+        label6.grid(row=0, column=2, pady=10, padx=10)
+
+        ent_dhs = ttk.Entry(self)
+        ent_dhs.grid(row=0, column=3)
+        ent_dhs.insert(0, '0')
+
+        label7 = tk.Label(self, text='DC dryers E pack')
+        label7.grid(row=1, column=2, pady=10, padx=10)
+
+        ent_dc = ttk.Entry(self)
+        ent_dc.grid(row=1, column=3)
+        ent_dc.insert(0, '0')
 
         button1 = ttk.Button(self, text='Start Page', command=lambda: controller.show_frame(StartPage))
         button1.grid(row=4, column=4)
 
-        button2 = ttk.Button(self, text='Page One', command=lambda: controller.show_frame(PageStation))
-        button2.grid(row=5, column=4)
-
         button3 = ttk.Button(self, text='Calculate', command=lambda: self.get_sam_calculation(BD_SAM,
-                                                    int(ent_sn_comp.get()) + int(ent_athr_comp.get()),
-                                                    int(ent_sn_comp.get()) + int(ent_sn_units.get()),
-                                                    int(ent_filters.get()), int(ent_athr_comp.get())))
+                            int(ent_sn_comp.get()) + int(ent_athr_comp.get()),
+                            int(ent_sn_comp.get()) + int(ent_sn_units.get()) + int(ent_dc.get()) + int(ent_dhs.get()),
+                            int(ent_filters.get()), int(ent_athr_comp.get()), int(ent_dhs.get()), int(ent_dc.get())))
         button3.grid(row=3, column=3)
 
-    def sam_window_show(self, screen_name):
+    @staticmethod
+    def sam_window_show(screen_name):
         window = ChildWindow()
         img = ImageTk.PhotoImage(Image.open(screen_name))
         window.init_child('SAM configuration', '300x300', img)
 
-    def get_sam_calculation(self, bd_file, amount_compr, sn_units, not_sn_units, not_sn_compr):
+    def get_sam_calculation(self, bd_file, amount_compr, sn_units, not_sn_units, not_sn_compr, dhs, dc):
         try:
-            func.sam_calculation(bd_file, amount_compr, sn_units, not_sn_units, not_sn_compr)
+            func.sam_calculation(bd_file, amount_compr, sn_units, not_sn_units, not_sn_compr, dhs, dc)
         except TypeError:
             mb.showerror(title='Error', message='Data Base has not been downloaded')
+        except PermissionError:
+            mb.showerror(title='Error', message='Excel file is open')
         else:
             mb.showinfo(title='Success', message='Excel file has been created')
-            self.sam_window_show("test_screen.jpg")
+            if sn_units <= 7:
+                self.sam_window_show("7_RJ45.png")
+            else:
+                self.sam_window_show("13_RJ45.png")
+            if amount_compr > 16:
+                mb.showwarning(title='Warning', message='May be you need more than 1 pressure transducer')
 
 
 class ChildWindow(tk.Toplevel):
