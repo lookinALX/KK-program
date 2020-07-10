@@ -5,7 +5,6 @@ import Functional as func
 import configurations as conf
 from PIL import ImageTk, Image
 
-
 BD_EQUIP = None
 BD_SAM = None
 
@@ -74,7 +73,7 @@ class StartPage(tk.Frame):
         label1.grid(row=0, column=0, sticky='w', pady=30, padx=20)
 
         ent_db_equip = ttk.Entry(self, width=35, font='Helvetica 11')
-        ent_db_equip.insert(0, 'E:/Python Projects/KAESER_Program/test.csv')
+        ent_db_equip.insert(0, 'E:/Python Projects/KAESER_Program/BD.csv')
         ent_db_equip.grid(row=0, column=1, columnspan=3)
 
         but_ok_db_equip = ttk.Button(self, text='OK',
@@ -149,19 +148,27 @@ class PageStation(tk.Frame):
         equip_box3 = AutocompleteCombobox(self, values=conf.Equipment.dr_fl_dhs)
         equip_box3.grid(row=5, column=1, columnspan=2)
 
-        textbox = tk.Listbox(self, width=20, height=15)
-        textbox.grid(row=0, column=3, rowspan=8, padx=30, sticky='nse')
+        textbox = tk.Listbox(self, width=20, height=10)
+        textbox.grid(row=0, column=3, rowspan=6, padx=30, sticky='nse')
 
         scroll = tk.Scrollbar(self, command=textbox.yview)
-        scroll.grid(row=0, column=3, rowspan=8, sticky='nse')
+        scroll.grid(row=0, column=3, rowspan=6, sticky='nse')
         textbox.config(yscrollcommand=scroll.set)
+
+        label4 = tk.Label(self, text='Pressure:', font='Helvetica 11')
+        label4.grid(row=7, column=2)
+
+        ent_pressure = ttk.Combobox(self, values=[8, 10, 13])
+        ent_pressure.grid(row=7, column=3)
 
         but_get_deliv_list = ttk.Button(self, text='Delivery list',
                                         command=lambda: self.get_delivery_file(BD_EQUIP, textbox.get(0, tk.END)))
-        but_get_deliv_list.grid(row=1, column=4, padx=20)
+        but_get_deliv_list.grid(row=1, column=4, padx=15)
 
-        but_gap_check = ttk.Button(self, text='Check control gap')
-        but_gap_check.grid(row=3, column=4, padx=20)
+        but_gap_check = ttk.Button(self, text='Check control gap',
+                                   command=lambda: self.get_gap_check(BD_EQUIP, textbox.get(0, tk.END),
+                                                                      ent_pressure.get()))
+        but_gap_check.grid(row=3, column=4, padx=15)
 
     @staticmethod
     def get_delivery_file(bd_file, name_list):
@@ -176,6 +183,21 @@ class PageStation(tk.Frame):
                 mb.showerror(title='Error', message='Data Base has not been downloaded')
             else:
                 mb.showinfo(title='Success', message='Excel file has been created')
+
+    def get_gap_check(self, bd_file, name_list, pressure):
+        try:
+            if int(pressure) > 0 and (int(pressure) == 8 or int(pressure) == 10 or int(pressure) == 13):
+                flag = func.control_gap_result(bd_file, list(name_list), int(pressure))
+                if flag == 1:
+                    mb.showinfo(title='Success', message='There is no control gap!')
+                else:
+                    mb.showwarning(title='Control gap', message='There is a control gap!')
+            else:
+                mb.showerror(title='Error', message='Please select correct pressure')
+        except ValueError:
+            mb.showerror(title='Error', message='Please select pressure')
+        except TypeError:
+            mb.showerror(title='Error', message='Data Base has not been downloaded')
 
 
 class PageTwo(tk.Frame):
@@ -234,9 +256,18 @@ class PageTwo(tk.Frame):
         button1.grid(row=4, column=4)
 
         button3 = ttk.Button(self, text='Calculate', command=lambda: self.get_sam_calculation(BD_SAM,
-                            int(ent_sn_comp.get()) + int(ent_athr_comp.get()),
-                            int(ent_sn_comp.get()) + int(ent_sn_units.get()) + int(ent_dc.get()) + int(ent_dhs.get()),
-                            int(ent_filters.get()), int(ent_athr_comp.get()), int(ent_dhs.get()), int(ent_dc.get())))
+                                                                                              int(
+                                                                                                  ent_sn_comp.get()) + int(
+                                                                                                  ent_athr_comp.get()),
+                                                                                              int(
+                                                                                                  ent_sn_comp.get()) + int(
+                                                                                                  ent_sn_units.get()) + int(
+                                                                                                  ent_dc.get()) + int(
+                                                                                                  ent_dhs.get()),
+                                                                                              int(ent_filters.get()),
+                                                                                              int(ent_athr_comp.get()),
+                                                                                              int(ent_dhs.get()),
+                                                                                              int(ent_dc.get())))
         button3.grid(row=3, column=3)
 
     @staticmethod
